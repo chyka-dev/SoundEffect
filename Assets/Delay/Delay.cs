@@ -3,10 +3,30 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-public class ReadWave : MonoBehaviour
+public class Delay : MonoBehaviour
 {
     [SerializeField]
     string filepath;
+
+    /// <summary>
+    /// 減衰率.
+    /// </summary>
+    [SerializeField]
+    [Range(0.1f, 1f)]
+    float attenuation;
+
+    /// <summary>
+    /// 遅延時間 (sec).
+    /// </summary>
+    [SerializeField]
+    float delay;
+
+    /// <summary>
+    /// 繰り返し回数.
+    /// </summary>
+    [SerializeField]
+    [Range(1, 10)]
+    int repeat;
 
     MonoPCM pcm;
     IEnumerator<float> samples;
