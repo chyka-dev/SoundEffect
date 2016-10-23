@@ -34,7 +34,7 @@ public class Delay : MonoBehaviour
     void Awake()
     {
         pcm = Wave.ReadMono(filepath);
-        samples = Sample(pcm.Samples).GetEnumerator();
+        samples = DelayedSamples(pcm.Samples, pcm.Fs).GetEnumerator();
     }
 
     void OnAudioFilterRead(float[] data, int channels)
@@ -46,13 +46,42 @@ public class Delay : MonoBehaviour
         }
     }
 
-    public IEnumerable<float> Sample(float[] original)
+    public IEnumerable<float> Samples(float[] original)
     {
         int phase = 0;
 
         while(true)
         {
             var sample = original[phase++];
+            if(phase >= original.Length)
+            {
+                phase = 0;
+            }
+
+            yield return sample;
+        }
+    }
+
+    public IEnumerable<float> DelayedSamples(float[] original, int fs)
+    {
+        int phase = 0;
+
+        while(true)
+        {
+            var sample = original[phase++];
+
+            // 繰り返し回数だけ繰り返す.
+            for(int i = 1; i <= repeat; i++)
+            {
+                // delayから使用する過去のサンプルのインデックスを特定する.
+                var index = (int)(phase - (i * (fs * delay)));
+                if(index >= 0)
+                {
+                    // 現在のサンプルに過去の減衰した音を足す.
+                    sample += (float)Math.Pow(attenuation, repeat) * original[index];
+                }
+            }
+
             if(phase >= original.Length)
             {
                 phase = 0;
